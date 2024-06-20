@@ -23,19 +23,20 @@
 
         public function auth()
         {
-            $username = $this->input->post('username');
+            $email = $this->input->post('email');
             $password = $this->input->post('password');
-            $user = $this->Users_model->get_user();
+            $user = $this->Users_model->get_user_by_email($email);
 
-            if (empty($username) || empty($password)) {
-                $this->session->set_flashdata('msg', 'Username dan password harus diisi');
+            if (empty($email) || empty($password)) {
+                $this->session->set_flashdata('msg', 'email dan password harus diisi');
                 redirect('login');
-            }
-            $user_id = $user['id'];
-            $user = $this->Users_model->get_user_by_id($user_id);
+            }  
 
+            $user = $user[0];
+
+           
             if($user) {
-                if(password_verify($password, password_hash($user['password'], PASSWORD_DEFAULT))) {
+                if(password_verify($password, $user['password'])) {
                     $session_data = array(
                         'id' => $user['id'],
                         'username' => $user['username'],
@@ -45,6 +46,7 @@
                     redirect('dashboard');
                 } else {
                     $this->session->set_flashdata('msg', 'Password Salah');
+                    redirect('login');
                   
                 }
             } else {
